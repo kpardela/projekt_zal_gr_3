@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.base import ValidationError
 
 
 
@@ -21,12 +22,14 @@ class Kategoria(models.Model):
     """Model reprezentujący kategorię wydarzeń (np. Uczelnia, Praca, Prywatne)."""
     nazwa = models.CharField(max_length=50, help_text="Nazwa kategorii, np. Uczelnia.")
     opis = models.TextField(blank=True, help_text="Opis kategorii (opcjonalnie).")
-    kolor = models.CharField(max_length=7, default="#000000", help_text="Kolor w HEX, np. #FF0000.")
+    kolor = models.CharField(max_length=7, default="#000000", help_text="Kolor.")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, help_text="Użytkownik, do którego należy kategoria.")
 
     def __str__(self):
         return self.nazwa
 
+    class Meta:
+        ordering = ["nazwa"]
 
 class Miejsce(models.Model):
     """Model reprezentujący miejsce wydarzenia (opcjonalnie)."""
@@ -37,6 +40,9 @@ class Miejsce(models.Model):
 
     def __str__(self):
         return self.nazwa
+
+    class Meta:
+        ordering = ["nazwa"]
 
 
 class Wydarzenie(models.Model):
@@ -65,6 +71,12 @@ class Wydarzenie(models.Model):
 
     def __str__(self):
         return self.tytul
+
+    def save(self, *args, **kwargs):
+        if self.start > self.koniec:
+            raise ValidationError("Data rozpoczęcia nie moze byc po dacie zakończenia")
+        super().save(*args, **kwargs)
+
 
     class Meta:
         ordering = ["start"]  
