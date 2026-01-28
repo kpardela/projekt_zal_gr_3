@@ -1,7 +1,7 @@
-from dataclasses import fields
-from .models import Kategoria, Miejsce, Wydarzenie, Przypomnienie
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+
+from .models import Kategoria, Miejsce, Wydarzenie, Przypomnienie
 
 
 class KategoriaSerializer(serializers.ModelSerializer):
@@ -13,16 +13,18 @@ class KategoriaSerializer(serializers.ModelSerializer):
         validators = [
             UniqueTogetherValidator(
                 queryset=Kategoria.objects.all(),
-                fields=["owner", "nazwa"]
+                fields=["owner", "nazwa"],
             )
         ]
 
     def validate_nazwa(self, value):
+        value = (value or "").strip()
         if not value:
             raise serializers.ValidationError("Nazwa nie może być pusta.")
         if not value[0].isupper():
             raise serializers.ValidationError("Nazwa kategorii powinna zaczynać się wielką literą.")
         return value
+
 
 class MiejsceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,16 +35,18 @@ class MiejsceSerializer(serializers.ModelSerializer):
         validators = [
             UniqueTogetherValidator(
                 queryset=Miejsce.objects.all(),
-                fields=["owner", "nazwa"]
+                fields=["owner", "nazwa"],
             )
         ]
 
     def validate_nazwa(self, value):
+        value = (value or "").strip()
         if not value:
             raise serializers.ValidationError("Nazwa nie może być pusta.")
         if not value[0].isupper():
             raise serializers.ValidationError("Nazwa miejsca powinna zaczynać się wielką literą.")
         return value
+
 
 class WydarzenieSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,6 +68,7 @@ class WydarzenieSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "data_utworzenia"]
 
     def validate_tytul(self, value):
+        value = (value or "").strip()
         if not value:
             raise serializers.ValidationError("Tytuł nie może być pusty.")
         if not value[0].isupper():
@@ -71,8 +76,9 @@ class WydarzenieSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, data):
-        start = data.get("start")
-        koniec = data.get("koniec")
+        # Obsługa CREATE i UPDATE (przy update część pól może nie być w `data`)
+        start = data.get("start", getattr(self.instance, "start", None))
+        koniec = data.get("koniec", getattr(self.instance, "koniec", None))
 
         if start and koniec and koniec < start:
             raise serializers.ValidationError(
@@ -89,10 +95,11 @@ class PrzypomnienieSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
     def validate(self, data):
-        wydarzenie = data.get("wydarzenie")
-        kiedy = data.get("kiedy")
+        # Obsługa CREATE i UPDATE
+        wydarzenie = data.get("wydarzenie", getattr(self.instance, "wydarzenie", None))
+        kiedy = data.get("kiedy", getattr(self.instance, "kiedy", None))
 
-        if wydarzenie and kiedy and wydarzenie.koniec and kiedy > wydarzenie.koniec:
+        if wydarzenie and kiedy and getattr(wydarzenie, "koniec", None) and kiedy > wydarzenie.koniec:
             raise serializers.ValidationError(
                 {"kiedy": "Przypomnienie nie może być ustawione po zakończeniu wydarzenia."}
             )

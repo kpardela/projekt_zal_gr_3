@@ -1,4 +1,0 @@
-from .kategoria_serializers import KategoriaSerializer
-from .miejsce_serializers import MiejsceSerializer
-from .wydarzenie_serializers import WydarzenieSerializer
-from .przypomnienie_serializers import PrzypomnienieSerializer
