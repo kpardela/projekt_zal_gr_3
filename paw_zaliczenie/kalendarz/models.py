@@ -30,6 +30,10 @@ class Kategoria(models.Model):
 
     class Meta:
         ordering = ["nazwa"]
+        verbose_name = "Kategoria"
+        verbose_name_plural = "Kategorie"
+
+    
 
 class Miejsce(models.Model):
     """Model reprezentujący miejsce wydarzenia (opcjonalnie)."""
@@ -43,6 +47,8 @@ class Miejsce(models.Model):
 
     class Meta:
         ordering = ["nazwa"]
+        verbose_name = "Miejsce"
+        verbose_name_plural = "Miejsca"
 
 
 class Wydarzenie(models.Model):
@@ -79,7 +85,9 @@ class Wydarzenie(models.Model):
 
 
     class Meta:
-        ordering = ["start"]  
+        ordering = ["start"] 
+        verbose_name = "Wydarzenie"
+        verbose_name_plural = "Wydarzenia"
 
 
 class Przypomnienie(models.Model):
@@ -93,4 +101,6 @@ class Przypomnienie(models.Model):
         return f"Przypomnienie: {self.wydarzenie.tytul}"
 
     class Meta:
-        ordering = ["kiedy"]  
+        ordering = ["kiedy"] 
+        verbose_name = "Przypomnienie"
+        verbose_name_plural = "Przypomnienia"
